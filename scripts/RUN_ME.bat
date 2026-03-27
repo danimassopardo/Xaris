@@ -12,5 +12,5 @@ if errorlevel 1 (
 )
 
 echo.
-echo All good. Press any key to close this window...
+echo All done! Press any key to close this window...
 pause >nul
