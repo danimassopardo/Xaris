@@ -18,7 +18,21 @@ A high-density, minimalist digital dashboard for teachers to track students, ass
 - **Database**: Prisma v7 + SQLite (via `better-sqlite3`)
 - **ORM**: Prisma with migrations
 
-## Getting Started
+## Easy mode (Windows)
+
+No fuss — just double-click and go:
+
+1. Install **[Node.js 20+](https://nodejs.org/)** (one-time, free).
+2. Download or clone this repo to your computer.
+3. Open the `scripts` folder and double-click **`RUN_ME.bat`**.
+   - It will install everything, set up the database, and start the app automatically.
+4. Open **[http://localhost:3000](http://localhost:3000)** in your browser. That's it!
+
+> To stop the app, close the terminal window that opened (or press `Ctrl+C` inside it).
+
+---
+
+## Getting Started (developer steps)
 
 ### 1. Install dependencies
 
@@ -26,19 +40,25 @@ A high-density, minimalist digital dashboard for teachers to track students, ass
 npm install
 ```
 
-### 2. Run database migrations
+### 2. Generate the Prisma client
 
 ```bash
-npx prisma migrate dev
+npm run db:generate
 ```
 
-### 3. Seed sample data (10 students, 26 assignments)
+### 3. Run database migrations
+
+```bash
+npm run db:migrate
+```
+
+### 4. Seed sample data (10 students, 26 assignments)
 
 ```bash
 npm run seed
 ```
 
-### 4. Start the development server
+### 5. Start the development server
 
 ```bash
 npm run dev
