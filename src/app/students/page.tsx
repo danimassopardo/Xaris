@@ -16,9 +16,9 @@ export default async function StudentsPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-center gap-2">
         <Users className="h-6 w-6 text-[var(--primary)]" />
-        <h1 className="text-2xl font-bold">Students</h1>
+        <h1 className="text-2xl font-bold">Estudiantes</h1>
         <span className="ml-auto text-sm text-[var(--muted-foreground)]">
-          {students.length} total
+          {students.length} en total
         </span>
       </div>
       <StudentTable students={students} />

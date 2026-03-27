@@ -68,13 +68,13 @@ export default function EditStudentDialog({
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "Failed to update student");
+        setError(data.error ?? "Error al actualizar el estudiante");
         return;
       }
       onOpenChange(false);
       router.refresh();
     } catch {
-      setError("Network error");
+      setError("Error de red");
     } finally {
       setLoading(false);
     }
@@ -84,11 +84,11 @@ export default function EditStudentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Student</DialogTitle>
+          <DialogTitle>Editar Estudiante</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="edit-name">Name *</Label>
+            <Label htmlFor="edit-name">Nombre *</Label>
             <Input
               id="edit-name"
               value={form.name}
@@ -97,7 +97,7 @@ export default function EditStudentDialog({
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="edit-studentId">Student ID *</Label>
+            <Label htmlFor="edit-studentId">ID Estudiante *</Label>
             <Input
               id="edit-studentId"
               value={form.studentId}
@@ -106,7 +106,7 @@ export default function EditStudentDialog({
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="edit-course">Course *</Label>
+            <Label htmlFor="edit-course">Curso *</Label>
             <Input
               id="edit-course"
               value={form.course}
@@ -115,7 +115,7 @@ export default function EditStudentDialog({
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="edit-notes">Notes</Label>
+            <Label htmlFor="edit-notes">Notas</Label>
             <Textarea
               id="edit-notes"
               value={form.notes}
@@ -127,11 +127,11 @@ export default function EditStudentDialog({
           <DialogFooter className="pt-2">
             <DialogClose asChild>
               <Button type="button" variant="outline" disabled={loading}>
-                Cancel
+                Cancelar
               </Button>
             </DialogClose>
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? "Guardando..." : "Guardar Cambios"}
             </Button>
           </DialogFooter>
         </form>

@@ -50,7 +50,7 @@ export default function StudentTable({ students }: StudentTableProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   async function handleDelete(id: number) {
-    if (!confirm("Delete this student? All their assignments will also be deleted.")) return;
+    if (!confirm("¿Eliminar este estudiante? También se eliminarán todas sus tareas.")) return;
     setDeletingId(id);
     try {
       await fetch(`/api/students/${id}`, { method: "DELETE" });
@@ -92,7 +92,7 @@ export default function StudentTable({ students }: StudentTableProps) {
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--muted-foreground)]" />
           <Input
-            placeholder="Search by name or ID…"
+            placeholder="Buscar por nombre o ID…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-8"
@@ -104,9 +104,9 @@ export default function StudentTable({ students }: StudentTableProps) {
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="name">Sort: By Name</SelectItem>
-            <SelectItem value="urgency">Sort: By Urgency</SelectItem>
-            <SelectItem value="grade">Sort: By Grade</SelectItem>
+            <SelectItem value="name">Ordenar: Por Nombre</SelectItem>
+            <SelectItem value="urgency">Ordenar: Por Urgencia</SelectItem>
+            <SelectItem value="grade">Ordenar: Por Nota</SelectItem>
           </SelectContent>
         </Select>
         <Button
@@ -114,11 +114,11 @@ export default function StudentTable({ students }: StudentTableProps) {
           size="sm"
           onClick={() => setFilterLow(!filterLow)}
         >
-          Grade &lt; 70%
+          Nota &lt; 70%
         </Button>
         <Button size="sm" onClick={() => setAddOpen(true)}>
           <Plus className="h-4 w-4 mr-1" />
-          Add Student
+          Añadir Estudiante
         </Button>
       </div>
 
@@ -126,12 +126,12 @@ export default function StudentTable({ students }: StudentTableProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
-              <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Name</th>
-              <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Student ID</th>
-              <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Course</th>
-              <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Avg Grade</th>
-              <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Pending</th>
-              <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Actions</th>
+              <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Nombre</th>
+              <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">ID Estudiante</th>
+              <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Curso</th>
+              <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Nota Media</th>
+              <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Pendientes</th>
+              <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -141,7 +141,7 @@ export default function StudentTable({ students }: StudentTableProps) {
                   colSpan={6}
                   className="px-3 py-6 text-center text-[var(--muted-foreground)]"
                 >
-                  No students found.
+                  No se encontraron estudiantes.
                 </td>
               </tr>
             )}

@@ -41,28 +41,28 @@ export default async function DashboardPage() {
 
   const stats = [
     {
-      label: "Total Students",
+      label: "Total Estudiantes",
       value: students.length,
       icon: Users,
       color: "text-blue-600",
       bg: "bg-blue-50",
     },
     {
-      label: "Pending Assignments",
+      label: "Tareas Pendientes",
       value: allPending,
       icon: BookOpen,
       color: "text-amber-600",
       bg: "bg-amber-50",
     },
     {
-      label: "Upcoming Exams",
+      label: "Exámenes Próximos",
       value: upcomingExams,
       icon: Calendar,
       color: "text-purple-600",
       bg: "bg-purple-50",
     },
     {
-      label: "At-Risk Students",
+      label: "Estudiantes en Riesgo",
       value: atRiskStudents.length,
       icon: AlertTriangle,
       color: "text-red-600",
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-[var(--foreground)]">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-[var(--foreground)]">Inicio</h1>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map(({ label, value, icon: Icon, color, bg }) => (

@@ -43,14 +43,14 @@ export default function AddStudentDialog({ open, onOpenChange }: AddStudentDialo
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "Failed to create student");
+        setError(data.error ?? "Error al crear el estudiante");
         return;
       }
       setForm({ name: "", studentId: "", course: "", notes: "" });
       onOpenChange(false);
       router.refresh();
     } catch {
-      setError("Network error");
+      setError("Error de red");
     } finally {
       setLoading(false);
     }
@@ -60,11 +60,11 @@ export default function AddStudentDialog({ open, onOpenChange }: AddStudentDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Student</DialogTitle>
+          <DialogTitle>Añadir Estudiante</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name">Nombre *</Label>
             <Input
               id="name"
               value={form.name}
@@ -73,7 +73,7 @@ export default function AddStudentDialog({ open, onOpenChange }: AddStudentDialo
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="studentId">Student ID *</Label>
+            <Label htmlFor="studentId">ID Estudiante *</Label>
             <Input
               id="studentId"
               value={form.studentId}
@@ -82,7 +82,7 @@ export default function AddStudentDialog({ open, onOpenChange }: AddStudentDialo
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="course">Course *</Label>
+            <Label htmlFor="course">Curso *</Label>
             <Input
               id="course"
               value={form.course}
@@ -91,7 +91,7 @@ export default function AddStudentDialog({ open, onOpenChange }: AddStudentDialo
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">Notas</Label>
             <Textarea
               id="notes"
               value={form.notes}
@@ -103,11 +103,11 @@ export default function AddStudentDialog({ open, onOpenChange }: AddStudentDialo
           <DialogFooter className="pt-2">
             <DialogClose asChild>
               <Button type="button" variant="outline" disabled={loading}>
-                Cancel
+                Cancelar
               </Button>
             </DialogClose>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Student"}
+              {loading ? "Creando..." : "Crear Estudiante"}
             </Button>
           </DialogFooter>
         </form>

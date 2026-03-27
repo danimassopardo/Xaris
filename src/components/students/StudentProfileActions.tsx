@@ -20,7 +20,7 @@ export default function StudentProfileActions({ student }: { student: Student })
     <>
       <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
         <Edit className="h-4 w-4 mr-1" />
-        Edit Student
+        Editar Estudiante
       </Button>
       <EditStudentDialog student={student} open={open} onOpenChange={setOpen} />
     </>
