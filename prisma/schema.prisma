@@ -1,0 +1,45 @@
+// Student Lifecycle & Academic Tracker (SLAT) — Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// AssignmentType values: "ASSIGNMENT" | "EXAM"
+// AssignmentStatus values: "PENDING" | "SUBMITTED" | "GRADED"
+
+model Student {
+  id          Int          @id @default(autoincrement())
+  name        String
+  studentId   String       @unique
+  course      String
+  notes       String       @default("")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  assignments Assignment[]
+}
+
+model Subject {
+  id          Int          @id @default(autoincrement())
+  name        String
+  code        String       @unique
+  assignments Assignment[]
+}
+
+model Assignment {
+  id         Int      @id @default(autoincrement())
+  title      String
+  type       String   @default("ASSIGNMENT")
+  status     String   @default("PENDING")
+  gradeValue Float?
+  dueDate    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId  Int
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  subjectId  Int
+}
