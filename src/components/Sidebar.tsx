@@ -6,9 +6,9 @@ import { GraduationCap, LayoutDashboard, Users, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/students", label: "Students", icon: Users },
-  { href: "/assignments", label: "Assignments", icon: BookOpen },
+  { href: "/", label: "Inicio", icon: LayoutDashboard },
+  { href: "/students", label: "Estudiantes", icon: Users },
+  { href: "/assignments", label: "Tareas", icon: BookOpen },
 ];
 
 export default function Sidebar() {
@@ -21,7 +21,7 @@ export default function Sidebar() {
         <div>
           <p className="text-sm font-bold leading-none">SLAT</p>
           <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
-            Academic Tracker
+            Seguimiento Académico
           </p>
         </div>
       </div>

@@ -21,7 +21,7 @@ export default function AtRiskWidget({ students }: AtRiskWidgetProps) {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <AlertTriangle className="h-4 w-4 text-red-500" />
-          At-Risk Students
+          Estudiantes en riesgo
           {students.length > 0 && (
             <Badge variant="destructive" className="ml-auto">
               {students.length}
@@ -32,7 +32,7 @@ export default function AtRiskWidget({ students }: AtRiskWidgetProps) {
       <CardContent className="pt-0">
         {students.length === 0 ? (
           <p className="text-sm text-[var(--muted-foreground)] py-4 text-center">
-            No at-risk students. 🎉
+            Sin estudiantes en riesgo. 🎉
           </p>
         ) : (
           <ul className="space-y-2">
@@ -50,9 +50,9 @@ export default function AtRiskWidget({ students }: AtRiskWidgetProps) {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="destructive">{s.pendingCount} pending</Badge>
+                  <Badge variant="destructive">{s.pendingCount} pendientes</Badge>
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/students/${s.id}`}>View</Link>
+                    <Link href={`/students/${s.id}`}>Ver</Link>
                   </Button>
                 </div>
               </li>

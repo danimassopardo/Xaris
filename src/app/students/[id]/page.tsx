@@ -40,7 +40,7 @@ export default async function StudentProfilePage({
         <Button asChild variant="ghost" size="sm">
           <Link href="/students">
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Students
+            Estudiantes
           </Link>
         </Button>
       </div>
@@ -66,7 +66,7 @@ export default async function StudentProfilePage({
             <p className={`text-2xl font-bold ${getGradeColor(avg)}`}>
               {avg !== null ? `${avg.toFixed(1)}%` : "—"}
             </p>
-            <p className="text-xs text-[var(--muted-foreground)]">Avg Grade</p>
+            <p className="text-xs text-[var(--muted-foreground)]">Nota Media</p>
           </CardContent>
         </Card>
         <Card>
@@ -80,13 +80,13 @@ export default async function StudentProfilePage({
             <p className={`text-2xl font-bold ${pending > 3 ? "text-red-600" : "text-amber-600"}`}>
               {pending}
             </p>
-            <p className="text-xs text-[var(--muted-foreground)]">Pending</p>
+            <p className="text-xs text-[var(--muted-foreground)]">Pendientes</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
             <p className="text-2xl font-bold text-emerald-600">{graded}</p>
-            <p className="text-xs text-[var(--muted-foreground)]">Graded</p>
+            <p className="text-xs text-[var(--muted-foreground)]">Calificadas</p>
           </CardContent>
         </Card>
       </div>
@@ -94,7 +94,7 @@ export default async function StudentProfilePage({
       {student.notes && (
         <Card>
           <CardHeader className="pb-1">
-            <CardTitle className="text-sm text-[var(--muted-foreground)]">Notes</CardTitle>
+            <CardTitle className="text-sm text-[var(--muted-foreground)]">Notas</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-sm">{student.notes}</p>

@@ -3,8 +3,8 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 
 export const metadata: Metadata = {
-  title: "SLAT — Student Lifecycle & Academic Tracker",
-  description: "Track students, assignments, and grades",
+  title: "SLAT — Seguimiento Académico de Estudiantes",
+  description: "Gestiona estudiantes, tareas y calificaciones",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="es" className="h-full">
       <body className="h-full flex">
         <Sidebar />
         <main className="flex-1 overflow-y-auto bg-[var(--background)]">

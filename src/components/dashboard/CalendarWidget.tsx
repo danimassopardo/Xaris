@@ -31,10 +31,10 @@ function getDayGroups(assignments: AssignmentItem[]): DayGroup[] {
     d.setDate(today.getDate() + i);
     const label =
       i === 0
-        ? "Today"
+        ? "Hoy"
         : i === 1
-        ? "Tomorrow"
-        : d.toLocaleDateString("en-US", { weekday: "short" });
+        ? "Mañana"
+        : d.toLocaleDateString("es-ES", { weekday: "short" });
     days.push({ date: d, label, items: [] });
   }
   for (const a of assignments) {
@@ -57,13 +57,13 @@ export default function CalendarWidget({ assignments }: CalendarWidgetProps) {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Calendar className="h-4 w-4 text-[var(--primary)]" />
-          Upcoming 7 Days
+          Próximos 7 días
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
         {!hasAny ? (
           <p className="text-sm text-[var(--muted-foreground)] py-4 text-center">
-            No assignments due in the next 7 days.
+            No hay tareas en los próximos 7 días.
           </p>
         ) : (
           <div className="space-y-2">

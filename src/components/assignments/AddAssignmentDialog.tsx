@@ -76,14 +76,14 @@ export default function AddAssignmentDialog({
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "Failed to create assignment");
+        setError(data.error ?? "Error al crear la tarea");
         return;
       }
       setForm({ title: "", subjectId: "", type: "ASSIGNMENT", status: "PENDING", gradeValue: "", dueDate: "" });
       onOpenChange(false);
       router.refresh();
     } catch {
-      setError("Network error");
+      setError("Error de red");
     } finally {
       setLoading(false);
     }
@@ -93,11 +93,11 @@ export default function AddAssignmentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Assignment</DialogTitle>
+          <DialogTitle>Añadir Tarea</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="a-title">Title *</Label>
+            <Label htmlFor="a-title">Título *</Label>
             <Input
               id="a-title"
               value={form.title}
@@ -106,14 +106,14 @@ export default function AddAssignmentDialog({
             />
           </div>
           <div className="space-y-1">
-            <Label>Subject *</Label>
+            <Label>Asignatura *</Label>
             <Select
               value={form.subjectId}
               onValueChange={(v) => setForm({ ...form, subjectId: v })}
               required
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select subject…" />
+                <SelectValue placeholder="Seleccionar asignatura…" />
               </SelectTrigger>
               <SelectContent>
                 {subjects.map((s) => (
@@ -126,7 +126,7 @@ export default function AddAssignmentDialog({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <Label>Type *</Label>
+              <Label>Tipo *</Label>
               <Select
                 value={form.type}
                 onValueChange={(v) => setForm({ ...form, type: v })}
@@ -135,13 +135,13 @@ export default function AddAssignmentDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ASSIGNMENT">Assignment</SelectItem>
-                  <SelectItem value="EXAM">Exam</SelectItem>
+                  <SelectItem value="ASSIGNMENT">Tarea</SelectItem>
+                  <SelectItem value="EXAM">Examen</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Status *</Label>
+              <Label>Estado *</Label>
               <Select
                 value={form.status}
                 onValueChange={(v) => setForm({ ...form, status: v })}
@@ -150,16 +150,16 @@ export default function AddAssignmentDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="SUBMITTED">Submitted</SelectItem>
-                  <SelectItem value="GRADED">Graded</SelectItem>
+                  <SelectItem value="PENDING">Pendiente</SelectItem>
+                  <SelectItem value="SUBMITTED">Entregada</SelectItem>
+                  <SelectItem value="GRADED">Calificada</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <Label htmlFor="a-grade">Grade (0–100)</Label>
+              <Label htmlFor="a-grade">Nota (0–100)</Label>
               <Input
                 id="a-grade"
                 type="number"
@@ -168,11 +168,11 @@ export default function AddAssignmentDialog({
                 step="0.1"
                 value={form.gradeValue}
                 onChange={(e) => setForm({ ...form, gradeValue: e.target.value })}
-                placeholder="Optional"
+                placeholder="Opcional"
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="a-due">Due Date *</Label>
+              <Label htmlFor="a-due">Fecha de entrega *</Label>
               <Input
                 id="a-due"
                 type="date"
@@ -186,11 +186,11 @@ export default function AddAssignmentDialog({
           <DialogFooter className="pt-2">
             <DialogClose asChild>
               <Button type="button" variant="outline" disabled={loading}>
-                Cancel
+                Cancelar
               </Button>
             </DialogClose>
             <Button type="submit" disabled={loading || !form.subjectId}>
-              {loading ? "Adding..." : "Add Assignment"}
+              {loading ? "Añadiendo..." : "Añadir Tarea"}
             </Button>
           </DialogFooter>
         </form>
