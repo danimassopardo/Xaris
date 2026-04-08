@@ -22,13 +22,14 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, type, status, gradeValue, dueDate, studentId, subjectId } = body;
+    const { title, description, type, status, gradeValue, dueDate, studentId, subjectId } = body;
     if (!title || !dueDate || !studentId || !subjectId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
     const assignment = await prisma.assignment.create({
       data: {
         title,
+        description: description ?? "",
         type: type ?? "ASSIGNMENT",
         status: status ?? "PENDING",
         gradeValue: gradeValue != null ? parseFloat(gradeValue) : null,

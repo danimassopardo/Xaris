@@ -1,12 +1,25 @@
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen } from "lucide-react";
-import { formatDate, getGradeColor } from "@/lib/utils";
+import { BookOpen, AlertCircle } from "lucide-react";
+import { formatDate, getGradeColor, isOverdue, getRowColorByStatus } from "@/lib/utils";
 import Link from "next/link";
 
-export const dynamic = "force-dynamic";
+interface Assignment {
+  id: number;
+  title: string;
+  description?: string;
+  type: string;
+  status: string;
+  gradeValue: number | null;
+  dueDate: string;
+  student: { id: number; name: string };
+  subject: { id: number; name: string; code: string };
+}
 
-function statusBadge(status: string) {
+function statusBadge(status: string, overdue: boolean) {
+  if (overdue) return <Badge variant="destructive">Vencida</Badge>;
   if (status === "PENDING") return <Badge variant="warning">Pendiente</Badge>;
   if (status === "SUBMITTED") return <Badge variant="info">Entregada</Badge>;
   if (status === "GRADED") return <Badge variant="success">Calificada</Badge>;
@@ -18,20 +31,54 @@ function typeBadge(type: string) {
   return <Badge variant="indigo">Tarea</Badge>;
 }
 
-export default async function AssignmentsPage() {
-  const assignments = await prisma.assignment.findMany({
-    include: { student: true, subject: true },
-    orderBy: { dueDate: "asc" },
+const STATUS_FILTERS = [
+  { value: "ALL", label: "Todas" },
+  { value: "PENDING", label: "Pendiente" },
+  { value: "SUBMITTED", label: "Entregada" },
+  { value: "GRADED", label: "Calificada" },
+  { value: "OVERDUE", label: "Vencidas" },
+];
+
+export default function AssignmentsPage() {
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [filter, setFilter] = useState("ALL");
+
+  useEffect(() => {
+    fetch("/api/assignments")
+      .then((r) => r.json())
+      .then(setAssignments)
+      .catch(() => {});
+  }, []);
+
+  const filtered = assignments.filter((a) => {
+    if (filter === "ALL") return true;
+    if (filter === "OVERDUE") return isOverdue(a.dueDate, a.status);
+    return a.status === filter;
   });
 
   return (
     <div className="p-6 space-y-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <BookOpen className="h-6 w-6 text-[var(--primary)]" />
         <h1 className="text-2xl font-bold">Tareas</h1>
         <span className="ml-auto text-sm text-[var(--muted-foreground)]">
-          {assignments.length} en total
+          {filtered.length} de {assignments.length} en total
         </span>
+      </div>
+      <div className="flex gap-2 flex-wrap">
+        {STATUS_FILTERS.map((f) => (
+          <button
+            key={f.value}
+            onClick={() => setFilter(f.value)}
+            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+              filter === f.value
+                ? "bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]"
+                : "border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--primary)] hover:text-[var(--foreground)]"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
       <div className="rounded-md border border-[var(--border)] overflow-x-auto">
         <table className="w-full text-sm">
@@ -47,38 +94,54 @@ export default async function AssignmentsPage() {
             </tr>
           </thead>
           <tbody>
-            {assignments.length === 0 && (
+            {filtered.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-3 py-6 text-center text-[var(--muted-foreground)]">
-                  No hay tareas aún.
+                  No hay tareas en esta categoría.
                 </td>
               </tr>
             )}
-            {assignments.map((a) => (
-              <tr
-                key={a.id}
-                className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--muted)]/50"
-              >
-                <td className="px-3 py-2 font-medium">{a.title}</td>
-                <td className="px-3 py-2">
-                  <Link
-                    href={`/students/${a.student.id}`}
-                    className="text-[var(--primary)] hover:underline"
-                  >
-                    {a.student.name}
-                  </Link>
-                </td>
-                <td className="px-3 py-2 text-[var(--muted-foreground)]">{a.subject.code}</td>
-                <td className="px-3 py-2">{typeBadge(a.type)}</td>
-                <td className="px-3 py-2">{statusBadge(a.status)}</td>
-                <td className={`px-3 py-2 text-right font-semibold ${getGradeColor(a.gradeValue)}`}>
-                  {a.gradeValue != null ? `${a.gradeValue}%` : "—"}
-                </td>
-                <td className="px-3 py-2 text-[var(--muted-foreground)]">
-                  {formatDate(a.dueDate)}
-                </td>
-              </tr>
-            ))}
+            {filtered.map((a) => {
+              const overdue = isOverdue(a.dueDate, a.status);
+              const rowColor = getRowColorByStatus(a.status, overdue);
+              return (
+                <tr
+                  key={a.id}
+                  className={`border-b border-[var(--border)] last:border-0 hover:brightness-95 transition-colors ${rowColor}`}
+                >
+                  <td className="px-3 py-2">
+                    <div className="font-medium flex items-center gap-1">
+                      {overdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+                      {a.title}
+                    </div>
+                    {a.description && (
+                      <p className="text-xs text-[var(--muted-foreground)] mt-0.5 line-clamp-1">{a.description}</p>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    <Link
+                      href={`/students/${a.student.id}`}
+                      className="text-[var(--primary)] hover:underline"
+                    >
+                      {a.student.name}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span title={a.subject.name} className="text-[var(--muted-foreground)] cursor-help">
+                      {a.subject.code}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">{typeBadge(a.type)}</td>
+                  <td className="px-3 py-2">{statusBadge(a.status, overdue)}</td>
+                  <td className={`px-3 py-2 text-right font-semibold ${getGradeColor(a.gradeValue)}`}>
+                    {a.gradeValue != null ? `${a.gradeValue}%` : "—"}
+                  </td>
+                  <td className="px-3 py-2 text-[var(--muted-foreground)]">
+                    {formatDate(a.dueDate)}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

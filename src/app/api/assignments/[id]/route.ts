@@ -30,11 +30,12 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { title, type, status, gradeValue, dueDate, subjectId } = body;
+    const { title, description, type, status, gradeValue, dueDate, subjectId } = body;
     const assignment = await prisma.assignment.update({
       where: { id: parseInt(id) },
       data: {
         title,
+        description: description ?? "",
         type,
         status,
         gradeValue: gradeValue != null && gradeValue !== "" ? parseFloat(gradeValue) : null,

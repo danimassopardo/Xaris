@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AddAssignmentDialog from "./AddAssignmentDialog";
 import EditAssignmentDialog from "./EditAssignmentDialog";
-import { formatDate, getGradeColor } from "@/lib/utils";
+import { formatDate, getGradeColor, isOverdue, getRowColorByStatus } from "@/lib/utils";
 
 interface Subject {
   id: number;
@@ -18,6 +18,7 @@ interface Subject {
 interface Assignment {
   id: number;
   title: string;
+  description?: string;
   type: string;
   status: string;
   gradeValue: number | null;
@@ -31,7 +32,8 @@ interface AssignmentTableProps {
   assignments: Assignment[];
 }
 
-function statusBadge(status: string) {
+function statusBadge(status: string, overdue: boolean) {
+  if (overdue) return <Badge variant="destructive">Vencida</Badge>;
   if (status === "PENDING") return <Badge variant="warning">Pendiente</Badge>;
   if (status === "SUBMITTED") return <Badge variant="info">Entregada</Badge>;
   if (status === "GRADED") return <Badge variant="success">Calificada</Badge>;
@@ -96,45 +98,59 @@ export default function AssignmentTable({ studentId, assignments }: AssignmentTa
                 </td>
               </tr>
             )}
-            {assignments.map((a) => (
-              <tr
-                key={a.id}
-                className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--muted)]/50"
-              >
-                <td className="px-3 py-2 font-medium">{a.title}</td>
-                <td className="px-3 py-2 text-[var(--muted-foreground)]">
-                  {a.subject.code}
-                </td>
-                <td className="px-3 py-2">{typeBadge(a.type)}</td>
-                <td className="px-3 py-2">{statusBadge(a.status)}</td>
-                <td className={`px-3 py-2 text-right font-semibold ${getGradeColor(a.gradeValue)}`}>
-                  {a.gradeValue != null ? `${a.gradeValue}%` : "—"}
-                </td>
-                <td className="px-3 py-2 text-[var(--muted-foreground)]">
-                  {formatDate(a.dueDate)}
-                </td>
-                <td className="px-3 py-2">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleEdit(a)}
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-red-500 hover:text-red-700"
-                      disabled={deletingId === a.id}
-                      onClick={() => handleDelete(a.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {assignments.map((a) => {
+              const overdue = isOverdue(a.dueDate, a.status);
+              const rowColor = getRowColorByStatus(a.status, overdue);
+              return (
+                <tr
+                  key={a.id}
+                  className={`border-b border-[var(--border)] last:border-0 hover:brightness-95 transition-colors ${rowColor}`}
+                >
+                  <td className="px-3 py-2">
+                    <div className="font-medium flex items-center gap-1">
+                      {overdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+                      {a.title}
+                    </div>
+                    {a.description && (
+                      <p className="text-xs text-[var(--muted-foreground)] mt-0.5 line-clamp-1">{a.description}</p>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    <span title={a.subject.name} className="text-[var(--muted-foreground)] cursor-help">
+                      {a.subject.code}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">{typeBadge(a.type)}</td>
+                  <td className="px-3 py-2">{statusBadge(a.status, overdue)}</td>
+                  <td className={`px-3 py-2 text-right font-semibold ${getGradeColor(a.gradeValue)}`}>
+                    {a.gradeValue != null ? `${a.gradeValue}%` : "—"}
+                  </td>
+                  <td className="px-3 py-2 text-[var(--muted-foreground)]">
+                    {formatDate(a.dueDate)}
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEdit(a)}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-500 hover:text-red-700"
+                        disabled={deletingId === a.id}
+                        onClick={() => handleDelete(a.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
