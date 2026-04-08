@@ -22,7 +22,9 @@ export async function POST(request: NextRequest) {
     if (!name || !code) {
       return NextResponse.json({ error: "Nombre y código son obligatorios" }, { status: 400 });
     }
-    const subject = await prisma.subject.create({ data: { name: name.trim(), code: code.trim().toUpperCase() } });
+    const trimmedName = name.trim();
+    const upperCode = code.trim().toUpperCase();
+    const subject = await prisma.subject.create({ data: { name: trimmedName, code: upperCode } });
     return NextResponse.json(subject, { status: 201 });
   } catch (error: unknown) {
     console.error(error);
