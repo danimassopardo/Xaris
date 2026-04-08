@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -20,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import NewSubjectInline from "@/components/subjects/NewSubjectInline";
 
 interface Subject {
   id: number;
@@ -44,6 +46,7 @@ export default function AddAssignmentDialog({
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [form, setForm] = useState({
     title: "",
+    description: "",
     subjectId: "",
     type: "ASSIGNMENT",
     status: "PENDING",
@@ -59,6 +62,11 @@ export default function AddAssignmentDialog({
         .catch(() => {});
     }
   }, [open]);
+
+  function handleSubjectCreated(subject: Subject) {
+    setSubjects((prev) => [...prev, subject].sort((a, b) => a.name.localeCompare(b.name)));
+    setForm((f) => ({ ...f, subjectId: String(subject.id) }));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -79,7 +87,7 @@ export default function AddAssignmentDialog({
         setError(data.error ?? "Error al crear la tarea");
         return;
       }
-      setForm({ title: "", subjectId: "", type: "ASSIGNMENT", status: "PENDING", gradeValue: "", dueDate: "" });
+      setForm({ title: "", description: "", subjectId: "", type: "ASSIGNMENT", status: "PENDING", gradeValue: "", dueDate: "" });
       onOpenChange(false);
       router.refresh();
     } catch {
@@ -102,7 +110,19 @@ export default function AddAssignmentDialog({
               id="a-title"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
+              placeholder="Ej. Examen de álgebra"
               required
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="a-desc">Descripción</Label>
+            <Textarea
+              id="a-desc"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Instrucciones o notas adicionales…"
+              rows={2}
+              className="resize-none"
             />
           </div>
           <div className="space-y-1">
@@ -123,6 +143,7 @@ export default function AddAssignmentDialog({
                 ))}
               </SelectContent>
             </Select>
+            <NewSubjectInline onCreated={handleSubjectCreated} />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
@@ -135,8 +156,8 @@ export default function AddAssignmentDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ASSIGNMENT">Tarea</SelectItem>
-                  <SelectItem value="EXAM">Examen</SelectItem>
+                  <SelectItem value="ASSIGNMENT">📝 Tarea</SelectItem>
+                  <SelectItem value="EXAM">📋 Examen</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -150,9 +171,9 @@ export default function AddAssignmentDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PENDING">Pendiente</SelectItem>
-                  <SelectItem value="SUBMITTED">Entregada</SelectItem>
-                  <SelectItem value="GRADED">Calificada</SelectItem>
+                  <SelectItem value="PENDING">⏳ Pendiente</SelectItem>
+                  <SelectItem value="SUBMITTED">📤 Entregada</SelectItem>
+                  <SelectItem value="GRADED">✅ Calificada</SelectItem>
                 </SelectContent>
               </Select>
             </div>

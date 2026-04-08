@@ -6,11 +6,22 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: Date | string): string {
-  return new Date(date).toLocaleDateString("en-US", {
+  return new Date(date).toLocaleDateString("es-ES", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+}
+
+export function isOverdue(dueDate: Date | string, status: string): boolean {
+  return status === "PENDING" && new Date(dueDate) < new Date();
+}
+
+export function getRowColorByStatus(status: string, overdue: boolean): string {
+  if (overdue) return "bg-red-50 dark:bg-red-950/20";
+  if (status === "GRADED") return "bg-emerald-50 dark:bg-emerald-950/20";
+  if (status === "SUBMITTED") return "bg-blue-50 dark:bg-blue-950/20";
+  return ""; // PENDING — default
 }
 
 export function getGradeColor(grade: number | null): string {

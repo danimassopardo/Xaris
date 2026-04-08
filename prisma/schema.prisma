@@ -30,16 +30,17 @@ model Subject {
 }
 
 model Assignment {
-  id         Int      @id @default(autoincrement())
-  title      String
-  type       String   @default("ASSIGNMENT")
-  status     String   @default("PENDING")
-  gradeValue Float?
-  dueDate    DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId  Int
-  subject    Subject  @relation(fields: [subjectId], references: [id])
-  subjectId  Int
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @default("")
+  type        String   @default("ASSIGNMENT")
+  status      String   @default("PENDING")
+  gradeValue  Float?
+  dueDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId   Int
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+  subjectId   Int
 }
