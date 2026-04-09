@@ -24,6 +24,8 @@ import {
 import NewSubjectInline from "@/components/subjects/NewSubjectInline";
 import { Plus, Trash2 } from "lucide-react";
 
+const NO_CATEGORY_VALUE = "NONE";
+
 interface Subject {
   id: number;
   name: string;
@@ -65,7 +67,7 @@ export default function AddAssignmentDialog({
     title: "",
     description: "",
     subjectId: "",
-    categoryId: "",
+    categoryId: NO_CATEGORY_VALUE,
     type: "ASSIGNMENT",
     status: "PENDING",
     gradeValue: "",
@@ -110,7 +112,8 @@ export default function AddAssignmentDialog({
         body: JSON.stringify({
           ...form,
           studentId,
-          categoryId: form.categoryId !== "" ? parseInt(form.categoryId) : null,
+          categoryId:
+            form.categoryId !== NO_CATEGORY_VALUE ? parseInt(form.categoryId) : null,
           gradeValue:
             !rubricMode && form.gradeValue !== "" ? parseFloat(form.gradeValue) : null,
         }),
@@ -139,7 +142,7 @@ export default function AddAssignmentDialog({
         title: "",
         description: "",
         subjectId: "",
-        categoryId: "",
+        categoryId: NO_CATEGORY_VALUE,
         type: "ASSIGNMENT",
         status: "PENDING",
         gradeValue: "",
@@ -214,7 +217,7 @@ export default function AddAssignmentDialog({
                 <SelectValue placeholder="Sin categoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin categoría</SelectItem>
+                <SelectItem value={NO_CATEGORY_VALUE}>Sin categoría</SelectItem>
                 {categories.map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
                     {c.name}
