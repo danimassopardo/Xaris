@@ -51,13 +51,22 @@ export default function AssignmentTable({ studentId, assignments }: AssignmentTa
   const [editAssignment, setEditAssignment] = useState<Assignment | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   async function handleDelete(id: number) {
     if (!confirm("¿Eliminar esta tarea?")) return;
     setDeletingId(id);
+    setDeleteError("");
     try {
-      await fetch(`/api/assignments/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/assignments/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        setDeleteError("No se pudo eliminar la tarea. Inténtalo de nuevo.");
+        return;
+      }
       router.refresh();
+    } catch (err) {
+      console.error("Failed to delete assignment:", err);
+      setDeleteError("Error de red al eliminar la tarea.");
     } finally {
       setDeletingId(null);
     }
@@ -77,6 +86,9 @@ export default function AssignmentTable({ studentId, assignments }: AssignmentTa
           Añadir Tarea
         </Button>
       </div>
+      {deleteError && (
+        <p className="text-sm text-red-500">{deleteError}</p>
+      )}
       <div className="rounded-md border border-[var(--border)] overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

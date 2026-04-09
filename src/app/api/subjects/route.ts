@@ -28,9 +28,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(subject, { status: 201 });
   } catch (error: unknown) {
     console.error(error);
-    const msg = error instanceof Error && error.message.includes("Unique constraint")
-      ? "Ya existe una asignatura con ese código"
-      : "Error al crear la asignatura";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code: string }).code === "P2002"
+    ) {
+      return NextResponse.json({ error: "Ya existe una asignatura con ese código" }, { status: 409 });
+    }
+    return NextResponse.json({ error: "Error al crear la asignatura" }, { status: 500 });
   }
 }

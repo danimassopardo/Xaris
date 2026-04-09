@@ -90,7 +90,7 @@ export default function CalendarWidget({ assignments }: CalendarWidgetProps) {
                           variant={item.type === "EXAM" ? "purple" : "indigo"}
                           className="shrink-0"
                         >
-                          {item.type}
+                          {item.type === "EXAM" ? "Examen" : "Tarea"}
                         </Badge>
                         <span className="truncate font-medium">{item.title}</span>
                         <span className="text-[var(--muted-foreground)] truncate">

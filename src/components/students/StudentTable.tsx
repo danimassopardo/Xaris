@@ -48,13 +48,22 @@ export default function StudentTable({ students }: StudentTableProps) {
   const [editStudent, setEditStudent] = useState<Student | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   async function handleDelete(id: number) {
     if (!confirm("¿Eliminar este estudiante? También se eliminarán todas sus tareas.")) return;
     setDeletingId(id);
+    setDeleteError("");
     try {
-      await fetch(`/api/students/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/students/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        setDeleteError("No se pudo eliminar el estudiante. Inténtalo de nuevo.");
+        return;
+      }
       router.refresh();
+    } catch (err) {
+      console.error("Failed to delete student:", err);
+      setDeleteError("Error de red al eliminar el estudiante.");
     } finally {
       setDeletingId(null);
     }
@@ -122,6 +131,9 @@ export default function StudentTable({ students }: StudentTableProps) {
         </Button>
       </div>
 
+      {deleteError && (
+        <p className="text-sm text-red-500">{deleteError}</p>
+      )}
       <div className="rounded-md border border-[var(--border)] overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

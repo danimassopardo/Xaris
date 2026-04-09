@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, AlertCircle, Search, Loader2 } from "lucide-react";
 import { formatDate, getGradeColor, isOverdue, getRowColorByStatus } from "@/lib/utils";
 import Link from "next/link";
 
@@ -42,18 +43,34 @@ const STATUS_FILTERS = [
 export default function AssignmentsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [filter, setFilter] = useState("ALL");
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/assignments")
       .then((r) => r.json())
       .then(setAssignments)
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = assignments.filter((a) => {
-    if (filter === "ALL") return true;
-    if (filter === "OVERDUE") return isOverdue(a.dueDate, a.status);
-    return a.status === filter;
+    if (filter !== "ALL") {
+      if (filter === "OVERDUE" && !isOverdue(a.dueDate, a.status)) return false;
+      if (filter !== "OVERDUE" && a.status !== filter) return false;
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      if (
+        !a.title.toLowerCase().includes(q) &&
+        !a.student.name.toLowerCase().includes(q) &&
+        !a.subject.name.toLowerCase().includes(q) &&
+        !a.subject.code.toLowerCase().includes(q)
+      ) {
+        return false;
+      }
+    }
+    return true;
   });
 
   return (
@@ -64,6 +81,17 @@ export default function AssignmentsPage() {
         <span className="ml-auto text-sm text-[var(--muted-foreground)]">
           {filtered.length} de {assignments.length} en total
         </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--muted-foreground)]" />
+          <Input
+            placeholder="Buscar por título, estudiante o asignatura…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-8"
+          />
+        </div>
       </div>
       <div className="flex gap-2 flex-wrap">
         {STATUS_FILTERS.map((f) => (
@@ -94,14 +122,21 @@ export default function AssignmentsPage() {
             </tr>
           </thead>
           <tbody>
-            {filtered.length === 0 && (
+            {loading && (
+              <tr>
+                <td colSpan={7} className="px-3 py-8 text-center text-[var(--muted-foreground)]">
+                  <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                </td>
+              </tr>
+            )}
+            {!loading && filtered.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-3 py-6 text-center text-[var(--muted-foreground)]">
                   No hay tareas en esta categoría.
                 </td>
               </tr>
             )}
-            {filtered.map((a) => {
+            {!loading && filtered.map((a) => {
               const overdue = isOverdue(a.dueDate, a.status);
               const rowColor = getRowColorByStatus(a.status, overdue);
               return (
