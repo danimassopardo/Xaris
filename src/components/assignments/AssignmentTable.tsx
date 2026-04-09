@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Edit, Trash2, AlertCircle } from "lucide-react";
+import { Plus, Edit, Trash2, AlertCircle, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AddAssignmentDialog from "./AddAssignmentDialog";
 import EditAssignmentDialog from "./EditAssignmentDialog";
+import CloneAssignmentDialog from "./CloneAssignmentDialog";
 import { formatDate, getGradeColor, isOverdue, getRowColorByStatus } from "@/lib/utils";
 
 interface Subject {
@@ -19,6 +20,7 @@ interface Assignment {
   id: number;
   title: string;
   description?: string;
+  feedback?: string;
   type: string;
   status: string;
   gradeValue: number | null;
@@ -29,6 +31,7 @@ interface Assignment {
 
 interface AssignmentTableProps {
   studentId: number;
+  studentCourse: string;
   assignments: Assignment[];
 }
 
@@ -45,11 +48,13 @@ function typeBadge(type: string) {
   return <Badge variant="indigo">Tarea</Badge>;
 }
 
-export default function AssignmentTable({ studentId, assignments }: AssignmentTableProps) {
+export default function AssignmentTable({ studentId, studentCourse, assignments }: AssignmentTableProps) {
   const router = useRouter();
   const [addOpen, setAddOpen] = useState(false);
   const [editAssignment, setEditAssignment] = useState<Assignment | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [cloneAssignment, setCloneAssignment] = useState<Assignment | null>(null);
+  const [cloneOpen, setCloneOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState("");
 
@@ -75,6 +80,11 @@ export default function AssignmentTable({ studentId, assignments }: AssignmentTa
   function handleEdit(a: Assignment) {
     setEditAssignment(a);
     setEditOpen(true);
+  }
+
+  function handleClone(a: Assignment) {
+    setCloneAssignment(a);
+    setCloneOpen(true);
   }
 
   return (
@@ -126,6 +136,11 @@ export default function AssignmentTable({ studentId, assignments }: AssignmentTa
                     {a.description && (
                       <p className="text-xs text-[var(--muted-foreground)] mt-0.5 line-clamp-1">{a.description}</p>
                     )}
+                    {a.feedback && (
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5 line-clamp-1 italic">
+                        💬 {a.feedback}
+                      </p>
+                    )}
                   </td>
                   <td className="px-3 py-2">
                     <span title={a.subject.name} className="text-[var(--muted-foreground)] cursor-help">
@@ -142,6 +157,14 @@ export default function AssignmentTable({ studentId, assignments }: AssignmentTa
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        title="Clonar para curso"
+                        onClick={() => handleClone(a)}
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -176,6 +199,15 @@ export default function AssignmentTable({ studentId, assignments }: AssignmentTa
         open={editOpen}
         onOpenChange={setEditOpen}
       />
+      {cloneAssignment && (
+        <CloneAssignmentDialog
+          assignmentId={cloneAssignment.id}
+          assignmentTitle={cloneAssignment.title}
+          currentCourse={studentCourse}
+          open={cloneOpen}
+          onOpenChange={setCloneOpen}
+        />
+      )}
     </div>
   );
 }

@@ -30,7 +30,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { title, description, type, status, gradeValue, dueDate, subjectId } = body;
+    const { title, description, type, status, gradeValue, dueDate, subjectId, feedback } = body;
     if (!title || !dueDate || !subjectId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
@@ -42,6 +42,7 @@ export async function PUT(
         type,
         status,
         gradeValue: gradeValue != null && gradeValue !== "" ? parseFloat(gradeValue) : null,
+        feedback: feedback ?? "",
         dueDate: new Date(dueDate),
         subjectId: parseInt(subjectId),
       },

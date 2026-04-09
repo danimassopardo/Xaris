@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getPendingCount } from "@/lib/utils";
 import CalendarWidget from "@/components/dashboard/CalendarWidget";
 import AtRiskWidget from "@/components/dashboard/AtRiskWidget";
+import QuickFiltersWidget from "@/components/dashboard/QuickFiltersWidget";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, BookOpen, Calendar, AlertTriangle } from "lucide-react";
 
@@ -94,7 +95,8 @@ export default async function DashboardPage() {
         <div className="lg:col-span-4">
           <CalendarWidget assignments={upcomingAssignments} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 space-y-4">
+          <QuickFiltersWidget />
           <AtRiskWidget students={atRiskStudents} />
         </div>
       </div>

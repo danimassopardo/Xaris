@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { getAverageGrade, getGradeColor, getPendingCount } from "@/lib/utils";
+import { getAverageGrade, getGradeColor, getPendingCount, getAverageBySubject } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import AssignmentTable from "@/components/assignments/AssignmentTable";
@@ -33,6 +32,7 @@ export default async function StudentProfilePage({
   const avg = getAverageGrade(student.assignments);
   const pending = getPendingCount(student.assignments);
   const graded = student.assignments.filter((a) => a.status === "GRADED").length;
+  const subjectAverages = getAverageBySubject(student.assignments);
 
   return (
     <div className="p-6 space-y-5">
@@ -102,9 +102,33 @@ export default async function StudentProfilePage({
         </Card>
       )}
 
+      {subjectAverages.length > 0 && (
+        <Card>
+          <CardHeader className="pb-1">
+            <CardTitle className="text-sm text-[var(--muted-foreground)]">Nota media por asignatura</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {subjectAverages.map((s) => (
+                <div
+                  key={s.subjectId}
+                  className="rounded-md border border-[var(--border)] p-2 text-center"
+                >
+                  <p className={`text-lg font-bold ${getGradeColor(s.avg)}`}>
+                    {s.avg !== null ? `${s.avg.toFixed(1)}%` : "—"}
+                  </p>
+                  <p className="text-xs font-medium truncate" title={s.name}>{s.code}</p>
+                  <p className="text-xs text-[var(--muted-foreground)] truncate" title={s.name}>{s.name}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Separator />
 
-      <AssignmentTable studentId={student.id} assignments={student.assignments} />
+      <AssignmentTable studentId={student.id} studentCourse={student.course} assignments={student.assignments} />
     </div>
   );
 }
