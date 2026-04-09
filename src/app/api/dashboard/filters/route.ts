@@ -21,7 +21,7 @@ export async function GET() {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
-    const [toGrade, examsThisWeek, studentsRaw] = await Promise.all([
+    const [toGrade, examsThisWeek, studentsWithAssignments] = await Promise.all([
       prisma.assignment.count({ where: { status: "SUBMITTED" } }),
       prisma.assignment.count({
         where: {
@@ -43,7 +43,7 @@ export async function GET() {
       }),
     ]);
 
-    const studentsWithoutGradesThisMonth = studentsRaw.filter(
+    const studentsWithoutGradesThisMonth = studentsWithAssignments.filter(
       (s: { id: number; assignments: { id: number }[] }) => s.assignments.length === 0
     ).length;
 
