@@ -24,6 +24,8 @@ import {
 import NewSubjectInline from "@/components/subjects/NewSubjectInline";
 import { Plus, Trash2 } from "lucide-react";
 
+const NO_CATEGORY_VALUE = "NONE";
+
 interface Subject {
   id: number;
   name: string;
@@ -79,7 +81,7 @@ export default function EditAssignmentDialog({
     description: "",
     feedback: "",
     subjectId: "",
-    categoryId: "",
+    categoryId: NO_CATEGORY_VALUE,
     type: "ASSIGNMENT",
     status: "PENDING",
     gradeValue: "",
@@ -106,7 +108,8 @@ export default function EditAssignmentDialog({
         description: assignment.description ?? "",
         feedback: assignment.feedback ?? "",
         subjectId: String(assignment.subjectId),
-        categoryId: assignment.categoryId != null ? String(assignment.categoryId) : "",
+        categoryId:
+          assignment.categoryId != null ? String(assignment.categoryId) : NO_CATEGORY_VALUE,
         type: assignment.type,
         status: assignment.status,
         gradeValue: assignment.gradeValue != null ? String(assignment.gradeValue) : "",
@@ -158,7 +161,8 @@ export default function EditAssignmentDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          categoryId: form.categoryId !== "" ? parseInt(form.categoryId) : null,
+          categoryId:
+            form.categoryId !== NO_CATEGORY_VALUE ? parseInt(form.categoryId) : null,
           gradeValue:
             !rubricMode && form.gradeValue !== "" ? parseFloat(form.gradeValue) : null,
         }),
@@ -264,7 +268,7 @@ export default function EditAssignmentDialog({
                 <SelectValue placeholder="Sin categoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin categoría</SelectItem>
+                <SelectItem value={NO_CATEGORY_VALUE}>Sin categoría</SelectItem>
                 {categories.map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
                     {c.name}
