@@ -39,6 +39,36 @@ interface StudentTableProps {
 
 type SortOption = "name" | "urgency" | "grade";
 
+function PerformanceBadge({ avg }: { avg: number | null }) {
+  if (avg === null)
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+        <span className="h-2 w-2 rounded-full bg-gray-400" />
+        Sin datos
+      </span>
+    );
+  if (avg >= 85)
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+        Sobresaliente
+      </span>
+    );
+  if (avg >= 60)
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+        <span className="h-2 w-2 rounded-full bg-amber-500" />
+        Aprobado
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
+      <span className="h-2 w-2 rounded-full bg-red-500" />
+      En riesgo
+    </span>
+  );
+}
+
 export default function StudentTable({ students }: StudentTableProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -141,6 +171,7 @@ export default function StudentTable({ students }: StudentTableProps) {
               <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Nombre</th>
               <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">ID Estudiante</th>
               <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Curso</th>
+              <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Rendimiento</th>
               <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Nota Media</th>
               <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Pendientes</th>
               <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Acciones</th>
@@ -150,7 +181,7 @@ export default function StudentTable({ students }: StudentTableProps) {
             {filtered.length === 0 && (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-3 py-6 text-center text-[var(--muted-foreground)]"
                 >
                   No se encontraron estudiantes.
@@ -168,6 +199,9 @@ export default function StudentTable({ students }: StudentTableProps) {
                   <td className="px-3 py-2 font-medium">{s.name}</td>
                   <td className="px-3 py-2 text-[var(--muted-foreground)]">{s.studentId}</td>
                   <td className="px-3 py-2">{s.course}</td>
+                  <td className="px-3 py-2">
+                    <PerformanceBadge avg={avg} />
+                  </td>
                   <td className={`px-3 py-2 text-right font-semibold ${getGradeColor(avg)}`}>
                     {avg !== null ? `${avg.toFixed(1)}%` : "—"}
                   </td>

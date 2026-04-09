@@ -47,3 +47,27 @@ export function getAverageGrade(
 export function getPendingCount(assignments: { status: string }[]): number {
   return assignments.filter((a) => a.status === "PENDING").length;
 }
+
+export function getAverageBySubject(
+  assignments: { gradeValue: number | null; status: string; subject: { id: number; name: string; code: string } }[]
+): { subjectId: number; name: string; code: string; avg: number | null; count: number }[] {
+  const map = new Map<number, { name: string; code: string; sum: number; count: number }>();
+  for (const a of assignments) {
+    if (!map.has(a.subject.id)) {
+      map.set(a.subject.id, { name: a.subject.name, code: a.subject.code, sum: 0, count: 0 });
+    }
+    if (a.status === "GRADED" && a.gradeValue !== null) {
+      const entry = map.get(a.subject.id)!;
+      entry.sum += a.gradeValue;
+      entry.count += 1;
+    }
+  }
+  return Array.from(map.entries()).map(([subjectId, { name, code, sum, count }]) => ({
+    subjectId,
+    name,
+    code,
+    avg: count > 0 ? sum / count : null,
+    count,
+  }));
+}
+

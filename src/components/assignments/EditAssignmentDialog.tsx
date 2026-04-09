@@ -33,6 +33,7 @@ interface Assignment {
   id: number;
   title: string;
   description?: string;
+  feedback?: string;
   type: string;
   status: string;
   gradeValue: number | null;
@@ -58,6 +59,7 @@ export default function EditAssignmentDialog({
   const [form, setForm] = useState({
     title: "",
     description: "",
+    feedback: "",
     subjectId: "",
     type: "ASSIGNMENT",
     status: "PENDING",
@@ -79,6 +81,7 @@ export default function EditAssignmentDialog({
       setForm({
         title: assignment.title,
         description: assignment.description ?? "",
+        feedback: assignment.feedback ?? "",
         subjectId: String(assignment.subjectId),
         type: assignment.type,
         status: assignment.status,
@@ -144,6 +147,17 @@ export default function EditAssignmentDialog({
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Instrucciones o notas adicionales…"
+              rows={2}
+              className="resize-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="ea-feedback">Retroalimentación</Label>
+            <Textarea
+              id="ea-feedback"
+              value={form.feedback}
+              onChange={(e) => setForm({ ...form, feedback: e.target.value })}
+              placeholder="Notas sobre la calificación del estudiante…"
               rows={2}
               className="resize-none"
             />
