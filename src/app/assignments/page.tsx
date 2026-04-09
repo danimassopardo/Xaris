@@ -55,8 +55,10 @@ export default function AssignmentsPage() {
   }, []);
 
   const filtered = assignments.filter((a) => {
-    if (filter === "OVERDUE" && !isOverdue(a.dueDate, a.status)) return false;
-    if (filter !== "ALL" && filter !== "OVERDUE" && a.status !== filter) return false;
+    if (filter !== "ALL") {
+      if (filter === "OVERDUE" && !isOverdue(a.dueDate, a.status)) return false;
+      if (filter !== "OVERDUE" && a.status !== filter) return false;
+    }
     if (search) {
       const q = search.toLowerCase();
       if (

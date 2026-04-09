@@ -64,7 +64,8 @@ export default function AssignmentTable({ studentId, assignments }: AssignmentTa
         return;
       }
       router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("Failed to delete assignment:", err);
       setDeleteError("Error de red al eliminar la tarea.");
     } finally {
       setDeletingId(null);

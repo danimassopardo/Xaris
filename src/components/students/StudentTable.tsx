@@ -61,7 +61,8 @@ export default function StudentTable({ students }: StudentTableProps) {
         return;
       }
       router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("Failed to delete student:", err);
       setDeleteError("Error de red al eliminar el estudiante.");
     } finally {
       setDeletingId(null);
