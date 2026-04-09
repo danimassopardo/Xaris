@@ -22,11 +22,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import NewSubjectInline from "@/components/subjects/NewSubjectInline";
+import { Plus, Trash2 } from "lucide-react";
 
 interface Subject {
   id: number;
   name: string;
   code: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
+
+interface RubricRow {
+  name: string;
+  score: string;
+  maxScore: string;
 }
 
 interface Assignment {
@@ -39,6 +51,7 @@ interface Assignment {
   gradeValue: number | null;
   dueDate: string | Date;
   subjectId: number;
+  categoryId?: number | null;
 }
 
 interface EditAssignmentDialogProps {
@@ -56,11 +69,17 @@ export default function EditAssignmentDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [rubricMode, setRubricMode] = useState(false);
+  const [rubricRows, setRubricRows] = useState<RubricRow[]>([
+    { name: "", score: "", maxScore: "" },
+  ]);
   const [form, setForm] = useState({
     title: "",
     description: "",
     feedback: "",
     subjectId: "",
+    categoryId: "",
     type: "ASSIGNMENT",
     status: "PENDING",
     gradeValue: "",
@@ -72,10 +91,14 @@ export default function EditAssignmentDialog({
       .then((r) => r.json())
       .then(setSubjects)
       .catch(() => {});
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then(setCategories)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
-    if (assignment) {
+    if (assignment && open) {
       const d = new Date(assignment.dueDate);
       const dueStr = d.toISOString().split("T")[0];
       setForm({
@@ -83,18 +106,46 @@ export default function EditAssignmentDialog({
         description: assignment.description ?? "",
         feedback: assignment.feedback ?? "",
         subjectId: String(assignment.subjectId),
+        categoryId: assignment.categoryId != null ? String(assignment.categoryId) : "",
         type: assignment.type,
         status: assignment.status,
         gradeValue: assignment.gradeValue != null ? String(assignment.gradeValue) : "",
         dueDate: dueStr,
       });
+      fetch(`/api/assignments/${assignment.id}/rubric`)
+        .then((r) => r.json())
+        .then((items: { name: string; score: number; maxScore: number }[]) => {
+          if (items.length > 0) {
+            setRubricMode(true);
+            setRubricRows(
+              items.map((i) => ({
+                name: i.name,
+                score: String(i.score),
+                maxScore: String(i.maxScore),
+              }))
+            );
+          } else {
+            setRubricMode(false);
+            setRubricRows([{ name: "", score: "", maxScore: "" }]);
+          }
+        })
+        .catch(() => {});
     }
-  }, [assignment]);
+  }, [assignment, open]);
 
   function handleSubjectCreated(subject: Subject) {
     setSubjects((prev) => [...prev, subject].sort((a, b) => a.name.localeCompare(b.name)));
     setForm((f) => ({ ...f, subjectId: String(subject.id) }));
   }
+
+  const rubricTotal =
+    rubricMode && rubricRows.some((r) => r.maxScore !== "")
+      ? (() => {
+          const totalScore = rubricRows.reduce((s, r) => s + (parseFloat(r.score) || 0), 0);
+          const totalMax = rubricRows.reduce((s, r) => s + (parseFloat(r.maxScore) || 0), 0);
+          return totalMax > 0 ? (totalScore / totalMax) * 100 : null;
+        })()
+      : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -107,13 +158,35 @@ export default function EditAssignmentDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          gradeValue: form.gradeValue !== "" ? parseFloat(form.gradeValue) : null,
+          categoryId: form.categoryId !== "" ? parseInt(form.categoryId) : null,
+          gradeValue:
+            !rubricMode && form.gradeValue !== "" ? parseFloat(form.gradeValue) : null,
         }),
       });
       if (!res.ok) {
         const data = await res.json();
         setError(data.error ?? "Error al actualizar la tarea");
         return;
+      }
+      if (rubricMode) {
+        const validRows = rubricRows.filter((r) => r.name.trim());
+        await fetch(`/api/assignments/${assignment.id}/rubric`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            rubricItems: validRows.map((r) => ({
+              name: r.name,
+              score: parseFloat(r.score) || 0,
+              maxScore: parseFloat(r.maxScore) || 0,
+            })),
+          }),
+        });
+      } else {
+        await fetch(`/api/assignments/${assignment.id}/rubric`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rubricItems: [] }),
+        });
       }
       onOpenChange(false);
       router.refresh();
@@ -126,7 +199,7 @@ export default function EditAssignmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Tarea</DialogTitle>
         </DialogHeader>
@@ -181,6 +254,25 @@ export default function EditAssignmentDialog({
             </Select>
             <NewSubjectInline onCreated={handleSubjectCreated} />
           </div>
+          <div className="space-y-1">
+            <Label>Categoría</Label>
+            <Select
+              value={form.categoryId}
+              onValueChange={(v) => setForm({ ...form, categoryId: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sin categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Sin categoría</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <Label>Tipo *</Label>
@@ -210,34 +302,136 @@ export default function EditAssignmentDialog({
                   <SelectItem value="PENDING">⏳ Pendiente</SelectItem>
                   <SelectItem value="SUBMITTED">📤 Entregada</SelectItem>
                   <SelectItem value="GRADED">✅ Calificada</SelectItem>
+                  <SelectItem value="LATE">⚠️ Tardía</SelectItem>
+                  <SelectItem value="RESUBMITTED">🔄 Reenviada</SelectItem>
+                  <SelectItem value="EXEMPT">🚫 Exenta</SelectItem>
+                  <SelectItem value="INCOMPLETE">❌ Incompleta</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label htmlFor="ea-grade">Nota (0–100)</Label>
+          <div className="space-y-1">
+            <Label htmlFor="ea-due">Fecha de entrega *</Label>
+            <Input
+              id="ea-due"
+              type="date"
+              value={form.dueDate}
+              onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label>Calificación</Label>
+              <div className="flex gap-1 ml-auto">
+                <button
+                  type="button"
+                  onClick={() => setRubricMode(false)}
+                  className={`text-xs px-2 py-0.5 rounded border transition-colors ${
+                    !rubricMode
+                      ? "bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]"
+                      : "border-[var(--border)] text-[var(--muted-foreground)]"
+                  }`}
+                >
+                  Simple
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRubricMode(true)}
+                  className={`text-xs px-2 py-0.5 rounded border transition-colors ${
+                    rubricMode
+                      ? "bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]"
+                      : "border-[var(--border)] text-[var(--muted-foreground)]"
+                  }`}
+                >
+                  Rúbrica
+                </button>
+              </div>
+            </div>
+            {!rubricMode ? (
               <Input
-                id="ea-grade"
                 type="number"
                 min="0"
                 max="100"
                 step="0.1"
                 value={form.gradeValue}
                 onChange={(e) => setForm({ ...form, gradeValue: e.target.value })}
-                placeholder="Opcional"
+                placeholder="Nota (0–100, opcional)"
               />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="ea-due">Fecha de entrega *</Label>
-              <Input
-                id="ea-due"
-                type="date"
-                value={form.dueDate}
-                onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                required
-              />
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="grid grid-cols-[1fr_80px_80px_32px] gap-1 text-xs text-[var(--muted-foreground)] px-1">
+                  <span>Criterio</span>
+                  <span className="text-center">Ptos.</span>
+                  <span className="text-center">Máx.</span>
+                  <span />
+                </div>
+                {rubricRows.map((row, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_80px_80px_32px] gap-1">
+                    <Input
+                      placeholder="Criterio"
+                      value={row.name}
+                      onChange={(e) => {
+                        const r = [...rubricRows];
+                        r[i] = { ...r[i], name: e.target.value };
+                        setRubricRows(r);
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      placeholder="0"
+                      value={row.score}
+                      onChange={(e) => {
+                        const r = [...rubricRows];
+                        r[i] = { ...r[i], score: e.target.value };
+                        setRubricRows(r);
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      placeholder="10"
+                      value={row.maxScore}
+                      onChange={(e) => {
+                        const r = [...rubricRows];
+                        r[i] = { ...r[i], maxScore: e.target.value };
+                        setRubricRows(r);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="text-red-500 px-1"
+                      onClick={() => setRubricRows(rubricRows.filter((_, j) => j !== i))}
+                      disabled={rubricRows.length === 1}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() =>
+                    setRubricRows([...rubricRows, { name: "", score: "", maxScore: "" }])
+                  }
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  Añadir criterio
+                </Button>
+                {rubricTotal != null && (
+                  <p className="text-sm font-medium text-center">
+                    Total: {rubricTotal.toFixed(1)}%
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
           <DialogFooter className="pt-2">
@@ -255,3 +449,28 @@ export default function EditAssignmentDialog({
     </Dialog>
   );
 }
+
+interface Subject {
+  id: number;
+  name: string;
+  code: string;
+}
+
+interface Assignment {
+  id: number;
+  title: string;
+  description?: string;
+  feedback?: string;
+  type: string;
+  status: string;
+  gradeValue: number | null;
+  dueDate: string | Date;
+  subjectId: number;
+}
+
+interface EditAssignmentDialogProps {
+  assignment: Assignment | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+

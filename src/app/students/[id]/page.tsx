@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import AssignmentTable from "@/components/assignments/AssignmentTable";
 import StudentProfileActions from "@/components/students/StudentProfileActions";
-import { ChevronLeft, GraduationCap } from "lucide-react";
+import AuditLogPanel from "@/components/AuditLogPanel";
+import { ChevronLeft, GraduationCap, FileText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,12 @@ export default async function StudentProfilePage({
           <Link href="/students">
             <ChevronLeft className="h-4 w-4 mr-1" />
             Estudiantes
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm" className="ml-auto">
+          <Link href={`/students/${id}/report`}>
+            <FileText className="h-4 w-4 mr-1" />
+            Imprimir Informe
           </Link>
         </Button>
       </div>
@@ -129,6 +136,8 @@ export default async function StudentProfilePage({
       <Separator />
 
       <AssignmentTable studentId={student.id} studentCourse={student.course} assignments={student.assignments} />
+
+      <AuditLogPanel entityType="Assignment" entityId={student.id} />
     </div>
   );
 }
