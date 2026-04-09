@@ -26,6 +26,7 @@ interface Assignment {
   gradeValue: number | null;
   dueDate: string | Date;
   subjectId: number;
+  categoryId?: number | null;
   subject: Subject;
 }
 
@@ -40,6 +41,10 @@ function statusBadge(status: string, overdue: boolean) {
   if (status === "PENDING") return <Badge variant="warning">Pendiente</Badge>;
   if (status === "SUBMITTED") return <Badge variant="info">Entregada</Badge>;
   if (status === "GRADED") return <Badge variant="success">Calificada</Badge>;
+  if (status === "LATE") return <Badge variant="warning">Tardía</Badge>;
+  if (status === "RESUBMITTED") return <Badge variant="info">Reenviada</Badge>;
+  if (status === "EXEMPT") return <Badge variant="secondary">Exenta</Badge>;
+  if (status === "INCOMPLETE") return <Badge variant="destructive">Incompleta</Badge>;
   return <Badge variant="secondary">{status}</Badge>;
 }
 

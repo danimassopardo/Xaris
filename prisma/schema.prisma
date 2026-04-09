@@ -9,7 +9,7 @@ datasource db {
 }
 
 // AssignmentType values: "ASSIGNMENT" | "EXAM"
-// AssignmentStatus values: "PENDING" | "SUBMITTED" | "GRADED"
+// AssignmentStatus values: "PENDING" | "SUBMITTED" | "GRADED" | "LATE" | "RESUBMITTED" | "EXEMPT" | "INCOMPLETE"
 
 model Student {
   id          Int          @id @default(autoincrement())
@@ -23,25 +23,66 @@ model Student {
 }
 
 model Subject {
-  id          Int          @id @default(autoincrement())
-  name        String
-  code        String       @unique
+  id              Int              @id @default(autoincrement())
+  name            String
+  code            String           @unique
+  assignments     Assignment[]
+  categoryWeights CategoryWeight[]
+}
+
+model Category {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  weights     CategoryWeight[]
   assignments Assignment[]
 }
 
+model CategoryWeight {
+  id         Int      @id @default(autoincrement())
+  weight     Float    // 0–100 (percentage)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+  subject    Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId  Int?     // null = global weight
+
+  @@unique([categoryId, subjectId])
+}
+
+model RubricCriteria {
+  id           Int        @id @default(autoincrement())
+  name         String
+  score        Float      // earned score
+  maxScore     Float      // maximum score
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignmentId Int
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  entityType String   // "Assignment" | "Student"
+  entityId   Int
+  field      String
+  oldValue   String?
+  newValue   String?
+  timestamp  DateTime @default(now())
+}
+
 model Assignment {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String   @default("")
-  type        String   @default("ASSIGNMENT")
-  status      String   @default("PENDING")
-  gradeValue  Float?
-  feedback    String   @default("")
-  dueDate     DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId   Int
-  subject     Subject  @relation(fields: [subjectId], references: [id])
-  subjectId   Int
+  id             Int              @id @default(autoincrement())
+  title          String
+  description    String           @default("")
+  type           String           @default("ASSIGNMENT")
+  status         String           @default("PENDING")
+  gradeValue     Float?
+  feedback       String           @default("")
+  dueDate        DateTime
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  student        Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId      Int
+  subject        Subject          @relation(fields: [subjectId], references: [id])
+  subjectId      Int
+  category       Category?        @relation(fields: [categoryId], references: [id])
+  categoryId     Int?
+  rubricItems    RubricCriteria[]
 }

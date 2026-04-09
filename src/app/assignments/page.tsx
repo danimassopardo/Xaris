@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { BookOpen, AlertCircle, Search, Loader2 } from "lucide-react";
+import { BookOpen, AlertCircle, Search, Loader2, Download, Upload } from "lucide-react";
 import { formatDate, getGradeColor, isOverdue, getRowColorByStatus } from "@/lib/utils";
 import Link from "next/link";
+import ImportAssignmentsDialog from "@/components/assignments/ImportAssignmentsDialog";
 
 interface Assignment {
   id: number;
@@ -24,6 +25,10 @@ function statusBadge(status: string, overdue: boolean) {
   if (status === "PENDING") return <Badge variant="warning">Pendiente</Badge>;
   if (status === "SUBMITTED") return <Badge variant="info">Entregada</Badge>;
   if (status === "GRADED") return <Badge variant="success">Calificada</Badge>;
+  if (status === "LATE") return <Badge variant="warning">Tardía</Badge>;
+  if (status === "RESUBMITTED") return <Badge variant="info">Reenviada</Badge>;
+  if (status === "EXEMPT") return <Badge variant="secondary">Exenta</Badge>;
+  if (status === "INCOMPLETE") return <Badge variant="destructive">Incompleta</Badge>;
   return <Badge variant="secondary">{status}</Badge>;
 }
 
@@ -37,6 +42,10 @@ const STATUS_FILTERS = [
   { value: "PENDING", label: "Pendiente" },
   { value: "SUBMITTED", label: "Entregada" },
   { value: "GRADED", label: "Calificada" },
+  { value: "LATE", label: "Tardía" },
+  { value: "RESUBMITTED", label: "Reenviada" },
+  { value: "EXEMPT", label: "Exenta" },
+  { value: "INCOMPLETE", label: "Incompleta" },
   { value: "OVERDUE", label: "Vencidas" },
 ];
 
@@ -45,6 +54,7 @@ export default function AssignmentsPage() {
   const [filter, setFilter] = useState("ALL");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [importOpen, setImportOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/assignments")
@@ -78,9 +88,25 @@ export default function AssignmentsPage() {
       <div className="flex items-center gap-2 flex-wrap">
         <BookOpen className="h-6 w-6 text-[var(--primary)]" />
         <h1 className="text-2xl font-bold">Tareas</h1>
-        <span className="ml-auto text-sm text-[var(--muted-foreground)]">
+        <span className="text-sm text-[var(--muted-foreground)]">
           {filtered.length} de {assignments.length} en total
         </span>
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => setImportOpen(true)}
+            className="flex items-center gap-1 text-sm border border-[var(--border)] rounded-md px-3 py-1.5 hover:bg-[var(--secondary)] transition-colors"
+          >
+            <Upload className="h-4 w-4" />
+            Importar CSV
+          </button>
+          <a
+            href="/api/export/assignments"
+            className="flex items-center gap-1 text-sm border border-[var(--border)] rounded-md px-3 py-1.5 hover:bg-[var(--secondary)] transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Exportar CSV
+          </a>
+        </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[220px] flex-1">
@@ -136,50 +162,47 @@ export default function AssignmentsPage() {
                 </td>
               </tr>
             )}
-            {!loading && filtered.map((a) => {
-              const overdue = isOverdue(a.dueDate, a.status);
-              const rowColor = getRowColorByStatus(a.status, overdue);
-              return (
-                <tr
-                  key={a.id}
-                  className={`border-b border-[var(--border)] last:border-0 hover:brightness-95 transition-colors ${rowColor}`}
-                >
-                  <td className="px-3 py-2">
-                    <div className="font-medium flex items-center gap-1">
-                      {overdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
-                      {a.title}
-                    </div>
-                    {a.description && (
-                      <p className="text-xs text-[var(--muted-foreground)] mt-0.5 line-clamp-1">{a.description}</p>
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    <Link
-                      href={`/students/${a.student.id}`}
-                      className="text-[var(--primary)] hover:underline"
-                    >
-                      {a.student.name}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2">
-                    <span title={a.subject.name} className="text-[var(--muted-foreground)] cursor-help">
-                      {a.subject.code}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">{typeBadge(a.type)}</td>
-                  <td className="px-3 py-2">{statusBadge(a.status, overdue)}</td>
-                  <td className={`px-3 py-2 text-right font-semibold ${getGradeColor(a.gradeValue)}`}>
-                    {a.gradeValue != null ? `${a.gradeValue}%` : "—"}
-                  </td>
-                  <td className="px-3 py-2 text-[var(--muted-foreground)]">
-                    {formatDate(a.dueDate)}
-                  </td>
-                </tr>
-              );
-            })}
+            {!loading &&
+              filtered.map((a) => {
+                const overdue = isOverdue(a.dueDate, a.status);
+                const rowColor = getRowColorByStatus(a.status, overdue);
+                return (
+                  <tr
+                    key={a.id}
+                    className={`border-b border-[var(--border)] last:border-0 hover:brightness-95 transition-colors ${rowColor}`}
+                  >
+                    <td className="px-3 py-2">
+                      <div className="font-medium flex items-center gap-1">
+                        {overdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+                        {a.title}
+                      </div>
+                      {a.description && (
+                        <p className="text-xs text-[var(--muted-foreground)] mt-0.5 line-clamp-1">{a.description}</p>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      <Link href={`/students/${a.student.id}`} className="text-[var(--primary)] hover:underline">
+                        {a.student.name}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2">
+                      <span title={a.subject.name} className="text-[var(--muted-foreground)] cursor-help">
+                        {a.subject.code}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">{typeBadge(a.type)}</td>
+                    <td className="px-3 py-2">{statusBadge(a.status, overdue)}</td>
+                    <td className={`px-3 py-2 text-right font-semibold ${getGradeColor(a.gradeValue)}`}>
+                      {a.gradeValue != null ? `${a.gradeValue}%` : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-[var(--muted-foreground)]">{formatDate(a.dueDate)}</td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
+      <ImportAssignmentsDialog open={importOpen} onOpenChange={setImportOpen} />
     </div>
   );
 }

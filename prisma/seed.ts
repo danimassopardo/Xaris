@@ -15,6 +15,8 @@ function daysFromNow(n: number): Date {
 
 async function main() {
   // Clean up existing data
+  await prisma.categoryWeight.deleteMany();
+  await prisma.category.deleteMany();
   await prisma.assignment.deleteMany();
   await prisma.student.deleteMany();
   await prisma.subject.deleteMany();
@@ -112,10 +114,27 @@ async function main() {
     )
   );
 
+  // Create categories
+  const [catExam, catHomework, catLab, catProject] = await Promise.all([
+    prisma.category.create({ data: { name: "Examen" } }),
+    prisma.category.create({ data: { name: "Tarea" } }),
+    prisma.category.create({ data: { name: "Laboratorio" } }),
+    prisma.category.create({ data: { name: "Proyecto" } }),
+  ]);
+
+  // Global default weights
+  await Promise.all([
+    prisma.categoryWeight.create({ data: { categoryId: catExam.id, subjectId: null, weight: 0.5 } }),
+    prisma.categoryWeight.create({ data: { categoryId: catHomework.id, subjectId: null, weight: 0.3 } }),
+    prisma.categoryWeight.create({ data: { categoryId: catLab.id, subjectId: null, weight: 0.1 } }),
+    prisma.categoryWeight.create({ data: { categoryId: catProject.id, subjectId: null, weight: 0.1 } }),
+  ]);
+
   console.log("✅ Seed complete:");
   console.log(`   ${subjects.length} subjects`);
   console.log(`   ${students.length} students`);
   console.log(`   ${assignmentDefs.length} assignments`);
+  console.log(`   4 categories with global weights`);
 }
 
 main()

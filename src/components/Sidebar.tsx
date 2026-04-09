@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, LayoutDashboard, Users, BookOpen } from "lucide-react";
+import { GraduationCap, LayoutDashboard, Users, BookOpen, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", label: "Inicio", icon: LayoutDashboard },
   { href: "/students", label: "Estudiantes", icon: Users },
   { href: "/assignments", label: "Tareas", icon: BookOpen },
+  { href: "/categories", label: "Categorías", icon: Tag },
 ];
 
 export default function Sidebar() {
