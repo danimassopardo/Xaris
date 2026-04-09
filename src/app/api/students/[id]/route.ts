@@ -36,13 +36,24 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
     const { name, studentId, course, notes } = body;
+    if (!name || !studentId || !course) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
     const student = await prisma.student.update({
       where: { id: parseInt(id) },
       data: { name, studentId, course, notes: notes ?? "" },
     });
     return NextResponse.json(student);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code: string }).code === "P2002"
+    ) {
+      return NextResponse.json({ error: "Student ID already exists" }, { status: 409 });
+    }
     return NextResponse.json({ error: "Failed to update student" }, { status: 500 });
   }
 }

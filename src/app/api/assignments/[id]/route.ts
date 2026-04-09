@@ -31,6 +31,9 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
     const { title, description, type, status, gradeValue, dueDate, subjectId } = body;
+    if (!title || !dueDate || !subjectId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
     const assignment = await prisma.assignment.update({
       where: { id: parseInt(id) },
       data: {
