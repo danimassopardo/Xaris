@@ -30,7 +30,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { title, description, type, status, gradeValue, dueDate, subjectId, feedback, categoryId } =
+    const { title, description, type, status, gradeValue, dueDate, subjectId, feedback, categoryId, completedAt, habitStatus, effortMinutes } =
       body;
     if (!title || !dueDate || !subjectId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -45,6 +45,8 @@ export async function PUT(
         subjectId: true,
         title: true,
         categoryId: true,
+        habitStatus: true,
+        completedAt: true,
       },
     });
     if (!existing) return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
@@ -85,6 +87,16 @@ export async function PUT(
         old: existing.categoryId != null ? String(existing.categoryId) : null,
         new: newCategoryId != null ? String(newCategoryId) : null,
       });
+    if (existing.habitStatus !== (habitStatus ?? "NOT_YET"))
+      fieldsToAudit.push({ field: "habitStatus", old: existing.habitStatus, new: habitStatus ?? "NOT_YET" });
+
+    const newCompletedAt = completedAt ? new Date(completedAt) : null;
+    if ((existing.completedAt?.toISOString() ?? null) !== (newCompletedAt?.toISOString() ?? null))
+      fieldsToAudit.push({
+        field: "completedAt",
+        old: existing.completedAt?.toISOString() ?? null,
+        new: newCompletedAt?.toISOString() ?? null,
+      });
 
     const assignment = await prisma.assignment.update({
       where: { id: parseInt(id) },
@@ -98,6 +110,9 @@ export async function PUT(
         dueDate: newDueDate,
         subjectId: newSubjectId,
         categoryId: newCategoryId,
+        completedAt: newCompletedAt,
+        habitStatus: habitStatus ?? "NOT_YET",
+        effortMinutes: effortMinutes != null && effortMinutes !== "" ? parseInt(effortMinutes) : null,
       },
       include: { subject: true, student: true, rubricItems: true, category: true },
     });

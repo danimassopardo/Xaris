@@ -8,8 +8,9 @@ datasource db {
   provider = "sqlite"
 }
 
-// AssignmentType values: "ASSIGNMENT" | "EXAM"
-// AssignmentStatus values: "PENDING" | "SUBMITTED" | "GRADED" | "LATE" | "RESUBMITTED" | "EXEMPT" | "INCOMPLETE"
+// AssignmentType values: "ASSIGNMENT" | "EXAM" | "DELIVERY" | "OTHER"
+// AssignmentStatus values: "PENDING" | "SUBMITTED" | "DONE" | "GRADED" | "LATE" | "RESUBMITTED" | "EXEMPT" | "INCOMPLETE"
+// HabitStatus values: "NOT_YET" | "IN_PROGRESS" | "ACQUIRED"
 
 model Student {
   id          Int          @id @default(autoincrement())
@@ -85,4 +86,7 @@ model Assignment {
   category       Category?        @relation(fields: [categoryId], references: [id])
   categoryId     Int?
   rubricItems    RubricCriteria[]
+  completedAt    DateTime?
+  habitStatus    String           @default("NOT_YET")
+  effortMinutes  Int?
 }

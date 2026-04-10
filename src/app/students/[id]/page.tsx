@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { getAverageGrade, getGradeColor, getPendingCount, getAverageBySubject } from "@/lib/utils";
+import { getAverageGrade, getGradeColor, getPendingCount, getAverageBySubject, formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -34,6 +34,17 @@ export default async function StudentProfilePage({
   const pending = getPendingCount(student.assignments);
   const graded = student.assignments.filter((a) => a.status === "GRADED").length;
   const subjectAverages = getAverageBySubject(student.assignments);
+
+  const now = new Date();
+  const overdueCount = student.assignments.filter(
+    (a) => a.status === "PENDING" && new Date(a.dueDate) < now
+  ).length;
+  const nextDue = student.assignments
+    .filter((a) => !["SUBMITTED", "DONE", "GRADED", "EXEMPT"].includes(a.status))
+    .find((a) => new Date(a.dueDate) >= now);
+  const totalEffortMinutes = student.assignments
+    .filter((a) => !["SUBMITTED", "DONE", "GRADED", "EXEMPT"].includes(a.status) && a.effortMinutes != null)
+    .reduce((s, a) => s + (a.effortMinutes ?? 0), 0);
 
   return (
     <div className="p-6 space-y-5">
@@ -97,6 +108,44 @@ export default async function StudentProfilePage({
           </CardContent>
         </Card>
       </div>
+
+      {(overdueCount > 0 || nextDue || totalEffortMinutes > 0) && (
+        <Card>
+          <CardHeader className="pb-1">
+            <CardTitle className="text-sm text-[var(--muted-foreground)]">Carga pendiente</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex flex-wrap gap-4 text-sm">
+              <span>
+                <span className="font-semibold text-amber-600">{pending}</span>{" "}
+                <span className="text-[var(--muted-foreground)]">pendiente{pending !== 1 ? "s" : ""}</span>
+              </span>
+              {overdueCount > 0 && (
+                <span>
+                  <span className="font-semibold text-red-600">{overdueCount}</span>{" "}
+                  <span className="text-[var(--muted-foreground)]">vencida{overdueCount !== 1 ? "s" : ""}</span>
+                </span>
+              )}
+              {nextDue && (
+                <span>
+                  <span className="text-[var(--muted-foreground)]">Próxima entrega:</span>{" "}
+                  <span className="font-semibold">{formatDate(nextDue.dueDate)}</span>
+                </span>
+              )}
+              {totalEffortMinutes > 0 && (
+                <span>
+                  <span className="text-[var(--muted-foreground)]">Esfuerzo estimado:</span>{" "}
+                  <span className="font-semibold">
+                    {totalEffortMinutes >= 60
+                      ? `${Math.floor(totalEffortMinutes / 60)}h ${totalEffortMinutes % 60}min`
+                      : `${totalEffortMinutes}min`}
+                  </span>
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {student.notes && (
         <Card>
