@@ -24,6 +24,7 @@ function statusBadge(status: string, overdue: boolean) {
   if (overdue) return <Badge variant="destructive">Vencida</Badge>;
   if (status === "PENDING") return <Badge variant="warning">Pendiente</Badge>;
   if (status === "SUBMITTED") return <Badge variant="info">Entregada</Badge>;
+  if (status === "DONE") return <Badge variant="success">Hecho</Badge>;
   if (status === "GRADED") return <Badge variant="success">Calificada</Badge>;
   if (status === "LATE") return <Badge variant="warning">Tardía</Badge>;
   if (status === "RESUBMITTED") return <Badge variant="info">Reenviada</Badge>;
@@ -34,6 +35,8 @@ function statusBadge(status: string, overdue: boolean) {
 
 function typeBadge(type: string) {
   if (type === "EXAM") return <Badge variant="purple">Examen</Badge>;
+  if (type === "DELIVERY") return <Badge variant="indigo">Entrega</Badge>;
+  if (type === "OTHER") return <Badge variant="secondary">Otro</Badge>;
   return <Badge variant="indigo">Tarea</Badge>;
 }
 
@@ -41,6 +44,7 @@ const STATUS_FILTERS = [
   { value: "ALL", label: "Todas" },
   { value: "PENDING", label: "Pendiente" },
   { value: "SUBMITTED", label: "Entregada" },
+  { value: "DONE", label: "Hecho" },
   { value: "GRADED", label: "Calificada" },
   { value: "LATE", label: "Tardía" },
   { value: "RESUBMITTED", label: "Reenviada" },

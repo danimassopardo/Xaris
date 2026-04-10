@@ -106,3 +106,42 @@ prisma/
 ├── seed.ts                         # Sample data seed script
 └── migrations/                     # SQL migration history
 ```
+
+## Per-assignment Habit Tracking & Pedagogy Fields
+
+### `completedAt`
+An optional date-time field on every assignment that records the **real date** of completion:
+- For **entregas** (deliveries / homework): the date the student actually submitted.
+- For **exámenes** (exams) and other items: the date the exam was taken or the task was done.
+
+It is separate from `dueDate` (the target/deadline date) so teachers can compare both and spot patterns of lateness or early delivery.
+
+### `habitStatus`
+An optional indicator per assignment that reflects whether the student is building the right habit for that particular task. Possible values:
+
+| Value | Meaning |
+|-------|---------|
+| `NOT_YET` | Habit not yet observed / not applicable |
+| `IN_PROGRESS` | Student is improving — habit is forming |
+| `ACQUIRED` | Habit is consolidated for this type of task |
+
+Editable directly from the assignment row (inline select) or from the Edit dialog.
+
+### Assignment table in the student profile
+The student profile page (`/students/[id]`) shows a table with one row per assignment and the following columns:
+
+| Column | Description |
+|--------|-------------|
+| Examen/Entrega | Title, type badge (Tarea / Examen / Entrega / Otro), and overdue indicator |
+| Asignatura | Subject code |
+| Estado | Current status with quick "→ Tardía" action when overdue |
+| Nota | Grade value |
+| Fecha objetivo | `dueDate` — the planned deadline |
+| Fecha real | `completedAt` — when it was actually done |
+| Hábito | `habitStatus` inline select |
+| Acciones | Mark done/submitted (✔), clone, edit, delete |
+
+The **workload summary** card above the table shows at a glance: number of pending items, number of overdue items, next upcoming deadline, and total estimated effort in minutes.
+
+### `effortMinutes`
+Optional integer field estimating the number of minutes needed to complete the assignment. Used in the workload summary to give a total effort estimate for all non-final pending assignments.

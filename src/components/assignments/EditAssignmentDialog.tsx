@@ -52,6 +52,9 @@ interface Assignment {
   status: string;
   gradeValue: number | null;
   dueDate: string | Date;
+  completedAt?: string | Date | null;
+  habitStatus?: string | null;
+  effortMinutes?: number | null;
   subjectId: number;
   categoryId?: number | null;
 }
@@ -86,6 +89,9 @@ export default function EditAssignmentDialog({
     status: "PENDING",
     gradeValue: "",
     dueDate: "",
+    completedAt: "",
+    habitStatus: "NOT_YET",
+    effortMinutes: "",
   });
 
   useEffect(() => {
@@ -114,6 +120,11 @@ export default function EditAssignmentDialog({
         status: assignment.status,
         gradeValue: assignment.gradeValue != null ? String(assignment.gradeValue) : "",
         dueDate: dueStr,
+        completedAt: assignment.completedAt
+          ? new Date(assignment.completedAt).toISOString().split("T")[0]
+          : "",
+        habitStatus: assignment.habitStatus ?? "NOT_YET",
+        effortMinutes: assignment.effortMinutes != null ? String(assignment.effortMinutes) : "",
       });
       fetch(`/api/assignments/${assignment.id}/rubric`)
         .then((r) => r.json())
@@ -165,6 +176,8 @@ export default function EditAssignmentDialog({
             form.categoryId !== NO_CATEGORY_VALUE ? parseInt(form.categoryId) : null,
           gradeValue:
             !rubricMode && form.gradeValue !== "" ? parseFloat(form.gradeValue) : null,
+          completedAt: form.completedAt || null,
+          effortMinutes: form.effortMinutes !== "" ? parseInt(form.effortMinutes) : null,
         }),
       });
       if (!res.ok) {
@@ -290,6 +303,8 @@ export default function EditAssignmentDialog({
                 <SelectContent>
                   <SelectItem value="ASSIGNMENT">📝 Tarea</SelectItem>
                   <SelectItem value="EXAM">📋 Examen</SelectItem>
+                  <SelectItem value="DELIVERY">📦 Entrega</SelectItem>
+                  <SelectItem value="OTHER">🔖 Otro</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -305,6 +320,7 @@ export default function EditAssignmentDialog({
                 <SelectContent>
                   <SelectItem value="PENDING">⏳ Pendiente</SelectItem>
                   <SelectItem value="SUBMITTED">📤 Entregada</SelectItem>
+                  <SelectItem value="DONE">✔️ Hecho</SelectItem>
                   <SelectItem value="GRADED">✅ Calificada</SelectItem>
                   <SelectItem value="LATE">⚠️ Tardía</SelectItem>
                   <SelectItem value="RESUBMITTED">🔄 Reenviada</SelectItem>
@@ -315,7 +331,7 @@ export default function EditAssignmentDialog({
             </div>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="ea-due">Fecha de entrega *</Label>
+            <Label htmlFor="ea-due">Fecha objetivo *</Label>
             <Input
               id="ea-due"
               type="date"
@@ -323,6 +339,45 @@ export default function EditAssignmentDialog({
               onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
               required
             />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label htmlFor="ea-completed">Fecha real</Label>
+              <Input
+                id="ea-completed"
+                type="date"
+                value={form.completedAt}
+                onChange={(e) => setForm({ ...form, completedAt: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="ea-effort">Esfuerzo (min)</Label>
+              <Input
+                id="ea-effort"
+                type="number"
+                min="0"
+                step="1"
+                value={form.effortMinutes}
+                onChange={(e) => setForm({ ...form, effortMinutes: e.target.value })}
+                placeholder="Ej. 60"
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label>Hábito</Label>
+            <Select
+              value={form.habitStatus}
+              onValueChange={(v) => setForm({ ...form, habitStatus: v })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NOT_YET">Sin hábito</SelectItem>
+                <SelectItem value="IN_PROGRESS">Mejorando</SelectItem>
+                <SelectItem value="ACQUIRED">Adquirido</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -453,28 +508,3 @@ export default function EditAssignmentDialog({
     </Dialog>
   );
 }
-
-interface Subject {
-  id: number;
-  name: string;
-  code: string;
-}
-
-interface Assignment {
-  id: number;
-  title: string;
-  description?: string;
-  feedback?: string;
-  type: string;
-  status: string;
-  gradeValue: number | null;
-  dueDate: string | Date;
-  subjectId: number;
-}
-
-interface EditAssignmentDialogProps {
-  assignment: Assignment | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
