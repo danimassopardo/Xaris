@@ -209,7 +209,7 @@ export default function AssignmentTable({ studentId, studentCourse, assignments 
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
-              <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Examen/Entrega</th>
+              <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Título</th>
               <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Asignatura</th>
               <th className="px-3 py-2 text-left font-medium text-[var(--muted-foreground)]">Estado</th>
               <th className="px-3 py-2 text-right font-medium text-[var(--muted-foreground)]">Nota</th>
@@ -281,6 +281,7 @@ export default function AssignmentTable({ studentId, studentCourse, assignments 
                     <select
                       value={a.habitStatus ?? "NOT_YET"}
                       onChange={(e) => handleHabitChange(a, e.target.value)}
+                      aria-label="Estado de hábito"
                       className="text-xs border border-[var(--border)] rounded px-1.5 py-0.5 bg-transparent cursor-pointer"
                     >
                       {HABIT_OPTIONS.map((o) => (

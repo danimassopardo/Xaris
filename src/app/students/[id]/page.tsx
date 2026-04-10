@@ -41,7 +41,8 @@ export default async function StudentProfilePage({
   ).length;
   const nextDue = student.assignments
     .filter((a) => !["SUBMITTED", "DONE", "GRADED", "EXEMPT"].includes(a.status))
-    .find((a) => new Date(a.dueDate) >= now);
+    .filter((a) => new Date(a.dueDate) >= now)
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
   const totalEffortMinutes = student.assignments
     .filter((a) => !["SUBMITTED", "DONE", "GRADED", "EXEMPT"].includes(a.status) && a.effortMinutes != null)
     .reduce((s, a) => s + (a.effortMinutes ?? 0), 0);
